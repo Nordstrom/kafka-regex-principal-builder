@@ -1,0 +1,37 @@
+repositories {
+  mavenCentral()
+  jcenter()
+}
+
+apply plugin: 'java'
+apply from:   'quality.gradle'
+apply plugin: 'checkstyle'
+
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
+
+tasks.withType(Javadoc) {
+  // Don't print missing javadoc warnings; checkstyle covers these.
+  options.addBooleanOption('Xdoclint:-missing', true)
+}
+
+checkstyle {
+  toolVersion '8.3'
+  configFile = rootProject.file('config/checkstyle/checkstyle.xml')
+}
+
+dependencies {
+  implementation( 'org.apache.kafka:kafka_2.12:2.0.0' )
+  implementation( 'com.yammer.metrics:metrics-core:2.2.0' )
+
+  testImplementation  'org.junit.jupiter:junit-jupiter-api:5.1.0'
+  testRuntimeOnly     'org.junit.jupiter:junit-jupiter-engine:5.1.0'
+}
+
+test {
+  useJUnitPlatform()
+  // These environment variables are needed by RegexPrincipalTests.java
+  environment "KAFKA_PRINCIPAL_BUILDER_REGEX", "(.+)/(.+)"
+  environment "MALFORMED_REGEX", "(.+"
+}
