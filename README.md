@@ -1,2 +1,3 @@
 # regex-principal-builder
-KafkaPrincipalBuilder that uses regular expression to determine authentication principal
+
+KafkaPrincipalBuilder that uses a regular expression to determine authentication principal.
