@@ -79,7 +79,7 @@ services:
       # Include principal-builder jar file to class path.
       CLASSPATH: "/var/lib/extras/*"
       KAFKA_PRINCIPAL_BUILDER_CLASS: "com.nordstrom.kafka.security.auth.RegexPrincipalBuilder"
-      # Regex to derive principal following aperture/proton naming convention of <principal>/<user>
+      # Regex to derive principal following 'slash-path' naming convention of <principal>/<user>
       KAFKA_PRINCIPAL_BUILDER_REGEX: "(.+)/(.+)"
     volumes:
     #comment out ./data/* if you don't want to persist data
