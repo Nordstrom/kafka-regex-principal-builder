@@ -1,0 +1,8 @@
+*.csr
+*.pkcs12
+ca.srl*
+ca.index*
+01.pem
+02.pem
+03.pem
+04.pem

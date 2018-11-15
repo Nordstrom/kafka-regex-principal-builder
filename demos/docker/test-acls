@@ -1,0 +1,124 @@
+#!/usr/bin/env bash
+
+echo "--[ create topic ]--"
+docker-compose exec broker kafka-topics --create \
+  --zookeeper zookeeper:2181 \
+  --topic strawberry-fields \
+  --partitions 1 \
+  --replication-factor 1
+
+echo "--[ create users ]--"
+docker-compose exec broker kafka-configs --alter \
+  --zookeeper zookeeper:2181 \
+  --add-config 'SCRAM-SHA-256=[password=sgtpepper],SCRAM-SHA-512=[password=sgtpepper]' \
+  --entity-type users \
+  --entity-name apple-records
+docker-compose exec broker kafka-configs --alter \
+  --zookeeper zookeeper:2181 \
+  --add-config 'SCRAM-SHA-256=[password=sgtpepper],SCRAM-SHA-512=[password=sgtpepper]' \
+  --entity-type users \
+  --entity-name beatles/john
+docker-compose exec broker kafka-configs --alter \
+  --zookeeper zookeeper:2181 \
+  --add-config 'SCRAM-SHA-256=[password=sgtpepper],SCRAM-SHA-512=[password=sgtpepper]' \
+  --entity-type users \
+  --entity-name beatles/paul
+docker-compose exec broker kafka-configs --alter \
+  --zookeeper zookeeper:2181 \
+  --add-config 'SCRAM-SHA-256=[password=sgtpepper],SCRAM-SHA-512=[password=sgtpepper]' \
+  --entity-type users \
+  --entity-name beatles/george
+docker-compose exec broker kafka-configs --alter \
+  --zookeeper zookeeper:2181 \
+  --add-config 'SCRAM-SHA-256=[password=sgtpepper],SCRAM-SHA-512=[password=sgtpepper]' \
+  --entity-type users \
+  --entity-name beatles/ringo
+
+echo "--[ allow apple-records to read from topic ]--"
+docker-compose exec broker kafka-acls --add \
+  --authorizer-properties zookeeper.connect=zookeeper:2181 \
+  --allow-principal User:apple-records \
+  --consumer \
+  --topic '*' \
+  --group '*'
+
+echo "--[ allow beatles principal to read/write topic ]--"
+docker-compose exec broker kafka-acls --add \
+  --authorizer-properties zookeeper.connect=zookeeper:2181 \
+  --allow-principal User:beatles \
+  --producer \
+  --topic '*' \
+  --group '*'
+
+echo "--[ produce messages ]--"
+echo -n "One, "
+echo "[beatles/john] says   'Let me take you down'" | docker run -i --rm \
+  --network kafka_local \
+  -v $PWD/private/ca.pem:/ca.pem \
+  confluentinc/cp-kafkacat \
+    kafkacat -b broker:9093 \
+    -X security.protocol=sasl_plaintext \
+    -X sasl.mechanisms=SCRAM-SHA-256 \
+    -X sasl.username=beatles/john \
+    -X sasl.password=sgtpepper \
+    -P -t strawberry-fields
+
+echo -n "two, "
+echo "[beatles/paul] says   'cuz I'm going to'" | docker run -i --rm \
+  --network kafka_local \
+  -v $PWD/private/ca.pem:/ca.pem \
+  confluentinc/cp-kafkacat \
+    kafkacat -b broker:9093 \
+    -X security.protocol=sasl_plaintext \
+    -X sasl.mechanisms=SCRAM-SHA-256 \
+    -X sasl.username=beatles/paul \
+    -X sasl.password=sgtpepper \
+    -P -t strawberry-fields
+
+echo -n "tres, "
+echo "[beatles/george] says 'Strawberry Fields'" | docker run -i --rm \
+  --network kafka_local \
+  -v $PWD/private/ca.pem:/ca.pem \
+  confluentinc/cp-kafkacat \
+    kafkacat -b broker:9093 \
+    -X security.protocol=sasl_plaintext \
+    -X sasl.mechanisms=SCRAM-SHA-256 \
+    -X sasl.username=beatles/george \
+    -X sasl.password=sgtpepper \
+    -P -t strawberry-fields
+
+echo "quatro!"
+echo "[beatles/ringo] says  'Nothing is real'" | docker run -i --rm \
+  --network kafka_local \
+  -v $PWD/private/ca.pem:/ca.pem \
+  confluentinc/cp-kafkacat \
+    kafkacat -b broker:9093 \
+    -X security.protocol=sasl_plaintext \
+    -X sasl.mechanisms=SCRAM-SHA-256 \
+    -X sasl.username=beatles/george \
+    -X sasl.password=sgtpepper \
+    -P -t strawberry-fields
+
+echo "--[ beatles is principal, not a user, so cannot produce messages ]--"
+echo "[beatles] says 'Rolling Stones stink'" | docker run -i --rm \
+  --network kafka_local \
+  -v $PWD/private/ca.pem:/ca.pem \
+  confluentinc/cp-kafkacat \
+    kafkacat -b broker:9093 \
+    -X security.protocol=sasl_plaintext \
+    -X sasl.mechanisms=SCRAM-SHA-256 \
+    -X sasl.username=beatles \
+    -X sasl.password=sgtpepper \
+    -P -t strawberry-fields
+
+echo "--[ consumer message as user apple-records ]--"
+docker run -i --rm \
+  --network kafka_local \
+  -v $PWD/private/ca.pem:/ca.pem \
+  confluentinc/cp-kafkacat \
+    kafkacat -b broker:9093 \
+    -X security.protocol=sasl_plaintext \
+    -X sasl.mechanisms=SCRAM-SHA-256 \
+    -X sasl.username=apple-records \
+    -X sasl.password=sgtpepper \
+    -C -t strawberry-fields -o beginning -e

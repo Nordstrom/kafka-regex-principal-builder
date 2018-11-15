@@ -1,0 +1,89 @@
+version: "3.7"
+
+networks:
+  kafka_local:
+    name: kafka_local
+
+services:
+  zookeeper:
+    image: dylanmei/exhibitor:1.6.0
+    init: true
+    command: ["--hostname", "zookeeper", "--defaultconfig", "/usr/exhibitor/default.properties", "--configtype", "file"]
+    networks:
+      - kafka_local
+    ports:
+    - 2181:2181
+    - 8080:8080
+    volumes:
+    #comment ./data/* out if you don't want to persist data
+    # - ./data/zookeeper:/var/lib/zookeeper
+    - ./exhibitor.properties:/usr/exhibitor/default.properties
+    - ./private/jaas.zookeeper.conf:/var/private/jaas.conf
+
+  bootstrap:
+    image: confluentinc/cp-kafka:5.0.0
+    entrypoint: /bootstrap.sh
+    environment:
+      KAFKA_OPTS: "-Djava.security.auth.login.config=/var/private/jaas.conf"
+    networks:
+      - kafka_local
+    volumes:
+    - ./bootstrap.sh:/bootstrap.sh
+    - ./private/jaas.broker.conf:/var/private/jaas.conf
+    depends_on: [zookeeper]
+
+  broker:
+    image: confluentinc/cp-kafka:5.0.0
+    networks:
+      - kafka_local
+    ports:
+    - 9093:9093
+    - 29010:29010
+    environment:
+      KAFKA_BROKER_ID: 1
+
+      KAFKA_ZOOKEEPER_CONNECT: "zookeeper:2181"
+      KAFKA_ZOOKEEPER_SET_ACL: "true"
+
+      KAFKA_LISTENERS: "PUBLIC://0.0.0.0:9093,REPLICATION://0.0.0.0:19093"
+      KAFKA_ADVERTISED_LISTENERS: "PUBLIC://broker:9093,REPLICATION://broker:19093"
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: "PUBLIC:SASL_PLAINTEXT,REPLICATION:SASL_PLAINTEXT"
+      KAFKA_SASL_ENABLED_MECHANISMS: SCRAM-SHA-256,SCRAM-SHA-512,PLAIN
+      KAFKA_INTER_BROKER_LISTENER_NAME: REPLICATION
+      KAFKA_SASL_MECHANISM_INTER_BROKER_PROTOCOL: PLAIN
+
+      KAFKA_AUTHORIZER_CLASS_NAME: kafka.security.auth.SimpleAclAuthorizer
+      KAFKA_ALLOW_EVERYONE_IF_NO_ACL_FOUND: "false"
+      KAFKA_SUPER_USERS: "User:admin"
+
+      KAFKA_LOG_DIRS: /var/lib/kafka/data
+      KAFKA_NUM_PARTITIONS: 2
+      KAFKA_DEFAULT_REPLICATION_FACTOR: 1
+      KAFKA_OFFSETS_TOPIC_NUM_PARTITIONS: 10
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+      KAFKA_DELETE_TOPIC_ENABLE: "false"
+      KAFKA_UNCLEAN_LEADER_ELECTION_ENABLE: "true"
+      KAFKA_AUTO_LEADER_REBALANCE_ENABLE: "true"
+
+      KAFKA_OPTS: "-Djava.security.auth.login.config=/var/private/jaas.conf"
+
+      #KAFKA_LOG4J_ROOT_LOGLEVEL: DEBUG
+      KAFKA_LOG4J_LOGGERS=kafka.authorizer.logger: DEBUG
+      KAFKA_JMX_HOSTNAME: broker
+      KAFKA_JMX_PORT: 29010
+
+      KAFKA_CONFLUENT_SUPPORT_METRICS_ENABLE: "false"
+
+      # Include principal-builder jar file to class path.
+      CLASSPATH: "/var/lib/extras/*"
+      KAFKA_PRINCIPAL_BUILDER_CLASS: "com.nordstrom.kafka.security.auth.RegexPrincipalBuilder"
+      # Regex to derive principal following aperture/proton naming convention of <principal>/<user>
+      KAFKA_PRINCIPAL_BUILDER_REGEX: "(.+)/(.+)"
+    volumes:
+    #comment out ./data/* if you don't want to persist data
+    # - ./data/kafka:/var/lib/kafka
+    - ../../build/libs:/var/lib/extras
+    - ./private/jaas.broker.conf:/var/private/jaas.conf
+    depends_on: [bootstrap, zookeeper]
