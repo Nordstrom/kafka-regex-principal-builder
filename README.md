@@ -1,6 +1,15 @@
 # regex-principal-builder
 
-KafkaPrincipalBuilder that uses a regular expression to determine authentication principal.
+A KafkaPrincipalBuilder that uses a regular expression to determine authentication principal.
+
+# JMX Metrics
+RegexPrincipalBuilder emits two JMX metrics:
+
+```
+kafka.security.RegexPrincipalBuilder
+  RequestsPerSec
+  ErrorsPerSec
+```
 
 ## Running the demo
 
@@ -21,7 +30,7 @@ The regular expression for resolving the principal name is `(.+)/(.+)` which wil
 ~/regex-principal-builder/demos/docker$ docker-compose up -d
 ```
 
-### Run `test-acls`
+### Run the test
 
 `test-acls` will create a topic, producer/consumer users and set acls, then produce messages and finally, consume those message.
 

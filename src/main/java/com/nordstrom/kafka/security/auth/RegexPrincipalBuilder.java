@@ -10,7 +10,9 @@ import org.apache.kafka.common.security.auth.AuthenticationContext;
 import org.apache.kafka.common.security.auth.KafkaPrincipal;
 import org.apache.kafka.common.security.auth.KafkaPrincipalBuilder;
 import org.apache.kafka.common.security.authenticator.DefaultKafkaPrincipalBuilder;
+import org.apache.kafka.common.utils.LogContext;
 import org.apache.kafka.common.utils.Utils;
+import org.slf4j.Logger;
 
 
 /**
@@ -21,9 +23,15 @@ public class RegexPrincipalBuilder implements KafkaPrincipalBuilder {
   public static final String KAFKA_PRINCIPAL_BUILDER_REGEX_ENV_VAR =
       "KAFKA_PRINCIPAL_BUILDER_REGEX";
 
+  private static final Logger log = new LogContext().logger(RegexPrincipal.class);
+
   private final RegexPrincipal regexPrincipal;
   private final KafkaPrincipalBuilder kafkaPrincipalBuilder;
 
+  // Create MetricName objects, passing in only the the 'mBeanName' with empty strings for 'group',
+  // 'type', 'name', and 'scope'.
+  // See
+  // http://javadox.com/com.yammer.metrics/metrics-core/2.2.0/com/yammer/metrics/core/MetricName.html#MetricName(java.lang.String,%20java.lang.String,%20java.lang.String,%20java.lang.String,%20java.lang.String)
   private final MetricName requestsName = new MetricName("", "", "", "",
       "kafka.security:type=RegexPrincipalBuilder,name=RequestsPerSec");
   private final MetricName errorsName = new MetricName("", "", "", "",
@@ -42,14 +50,20 @@ public class RegexPrincipalBuilder implements KafkaPrincipalBuilder {
   }
 
   public KafkaPrincipal build(AuthenticationContext authenticationContext) {
-    Utils.notNull(authenticationContext);
-
     requests.mark();
-    final KafkaPrincipal defaultPrincipal = kafkaPrincipalBuilder.build(authenticationContext);
-    final String original = defaultPrincipal.getName();
-    final String principal = regexPrincipal.principal(original);
+    try {
+      Utils.notNull(authenticationContext);
 
-    return new KafkaPrincipal(defaultPrincipal.getPrincipalType(), principal);
+      final KafkaPrincipal defaultPrincipal = kafkaPrincipalBuilder.build(authenticationContext);
+      final String original = defaultPrincipal.getName();
+      final String principal = regexPrincipal.principal(original);
+
+      return new KafkaPrincipal(defaultPrincipal.getPrincipalType(), principal);
+    } catch (Exception e) {
+      errors.mark();
+      log.error("Problem procesing RegexPrincipalBuilder request", e);
+      return kafkaPrincipalBuilder.build(authenticationContext);
+    }
   }
 
 } // -RegexPrincipalBuilder
