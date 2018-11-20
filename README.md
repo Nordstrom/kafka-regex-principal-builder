@@ -1,8 +1,16 @@
 # regex-principal-builder
 
-A KafkaPrincipalBuilder that uses a regular expression to determine authentication principal.
+A KafkaPrincipalBuilder that uses a regular expression to determine the authentication principal.
 
-# JMX Metrics
+## Defining the regular expression
+
+`RegexPrincipalBuilder` reads the environment variable `KAFKA_PRINCIPAL_BUILDER_REGEX` as a Java regular expression. If not present, a default of `(.+)`, which matches the entire string, is used.
+
+## Supported Kafka versions:
+
+The `RegExPrincipalBuilder` has been tested with kafka `v2.0.0` and `v2.0.1`(see build.gradle for dependencies)
+
+## JMX Metrics
 RegexPrincipalBuilder emits two JMX metrics:
 
 ```
@@ -13,7 +21,10 @@ kafka.security.RegexPrincipalBuilder
 
 ## Running the demo
 
-The demo runs a single-node zookeeper and kafka broker cluster with SASL_PLAINTEXT enabled.
+The demo runs a single-node zookeeper and kafka broker cluster with SASL_PLAINTEXT authentication.
+
+The regular expression for resolving the principal name is `(.+)/(.+)` which will resolve just `my-principal` name for a naming convention of `<my-principal>/<my-user>`.  The regular expression is defined by setting KAFKA_PRINCIPAL_BUILDER_REGEX environment variable to a java regular expression (see docker-compose.yml).
+
 
 ### Build the jar.
 
@@ -22,8 +33,6 @@ $ gradle clean assemble
 ```
 
 ### Start the kafka cluster.
-
-The regular expression for resolving the principal name is `(.+)/(.+)` which will resolve just `my-principal` name with the naming convention `<my-principal>/<my-user>`.  The regular expression is defined by setting KAFKA_PRINCIPAL_BUILDER_REGEX environment variable to a java regular expression (see docker-compose.yml).
 
 ```shell
 ~/regex-principal-builder$ cd demos/docker

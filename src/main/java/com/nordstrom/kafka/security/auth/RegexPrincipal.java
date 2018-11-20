@@ -7,7 +7,9 @@ import org.apache.kafka.common.utils.LogContext;
 import org.slf4j.Logger;
 
 public class RegexPrincipal {
-  public static final String REGEX_DEFAULT = "(.+)"; // Matches entire string (pass-through).
+  // If the environment variable is not set, this default is a 'pass-through' regular expression
+  // that will match the original principal.
+  public static final String REGEX_DEFAULT = "(.+)";
 
   private static final Logger log = new LogContext().logger(RegexPrincipal.class);
 
@@ -26,7 +28,12 @@ public class RegexPrincipal {
       regex = REGEX_DEFAULT;
     }
     // This will throw PatternSyntaxException if regex is malformed.
-    pattern = Pattern.compile(regex, Pattern.MULTILINE);
+    try {
+      pattern = Pattern.compile(regex, Pattern.MULTILINE);
+    } catch (Exception e) {
+      log.error("Error in regular expression '{}'", regex);
+      throw e;
+    }
   }
 
   /**
@@ -36,16 +43,19 @@ public class RegexPrincipal {
    * @return First group if a match, original string otherwise.
    */
   public String principal(String original) {
+    String matched = original;
     if (null != original && !original.isEmpty()) {
       final Matcher matcher = pattern.matcher(original);
 
       if (matcher.find()) {
         if (matcher.groupCount() > 0) {
-          return matcher.group(1);
+          matched = matcher.group(1);
         }
       }
     }
-    return original;
+    log.debug("regexprincipal:pattern={}, original={}, regex.group1={}", pattern.pattern(), original,
+        matched);
+    return matched;
   }
 
 }

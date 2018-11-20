@@ -99,7 +99,7 @@ echo "[beatles/ringo] says  'Nothing is real'" | docker run -i --rm \
     -X sasl.password=sgtpepper \
     -P -t strawberry-fields
 
-echo "--[ beatles is principal, not a user, so cannot produce messages ]--"
+echo "--[ 'beatles' is a principal, not a user, so cannot produce messages ]--"
 echo "[beatles] says 'Rolling Stones stink'" | docker run -i --rm \
   --network kafka_local \
   -v $PWD/private/ca.pem:/ca.pem \

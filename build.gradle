@@ -22,7 +22,7 @@ checkstyle {
 }
 
 dependencies {
-  implementation( 'org.apache.kafka:kafka_2.12:2.0.0' )
+  implementation( 'org.apache.kafka:kafka_2.11:2.0.1' )
   implementation( 'com.yammer.metrics:metrics-core:2.2.0' )
 
   testImplementation  'org.junit.jupiter:junit-jupiter-api:5.1.0'
@@ -31,7 +31,7 @@ dependencies {
 
 test {
   useJUnitPlatform()
-  // These environment variables are needed by RegexPrincipalTests.java
+  // These environment variables are needed by RegexPrincipalTests, RegexPrincipalBuilderTests
   environment "KAFKA_PRINCIPAL_BUILDER_REGEX", "(.+)/(.+)"
   environment "MALFORMED_REGEX", "(.+"
 }

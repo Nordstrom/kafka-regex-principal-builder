@@ -46,6 +46,7 @@ public class RegexPrincipalBuilder implements KafkaPrincipalBuilder {
     super();
 
     kafkaPrincipalBuilder = new DefaultKafkaPrincipalBuilder(null);
+    // NB: RegexPrincipal builder will throw an exception for a malformed regex.
     regexPrincipal = new RegexPrincipal(KAFKA_PRINCIPAL_BUILDER_REGEX_ENV_VAR);
   }
 

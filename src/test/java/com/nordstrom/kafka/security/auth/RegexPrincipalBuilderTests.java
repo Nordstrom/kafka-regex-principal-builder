@@ -19,16 +19,14 @@ class RegexPrincipalBuilderTests {
 
   @BeforeEach
   void setUp() throws Exception {
-
   }
 
   @AfterEach
   void tearDown() throws Exception {
-
   }
 
   @Test
-  void throwsExceptionForNullContext() {
+  void testNullContextThrowsException() {
     assertThrows(NullPointerException.class, () -> {
       RegexPrincipalBuilder builder = new RegexPrincipalBuilder();
       builder.build(null);

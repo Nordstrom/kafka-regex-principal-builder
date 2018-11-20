@@ -53,7 +53,7 @@ class RegexPrincipalTests {
   }
 
   @Test
-  void testMalformedRegex() {
+  void testMalformedRegexThrowsException() {
     assertThrows(PatternSyntaxException.class, () -> {
       regex = new RegexPrincipal("MALFORMED_REGEX");
       regex.principal("bluest-heron/bob-the-builder");

@@ -70,7 +70,7 @@ services:
       KAFKA_OPTS: "-Djava.security.auth.login.config=/var/private/jaas.conf"
 
       #KAFKA_LOG4J_ROOT_LOGLEVEL: DEBUG
-      KAFKA_LOG4J_LOGGERS=kafka.authorizer.logger: DEBUG
+      KAFKA_LOG4J_LOGGERS: "kafka.authorizer.logger=DEBUG,com.nordstrom.kafka.security.auth=DEBUG"
       KAFKA_JMX_HOSTNAME: broker
       KAFKA_JMX_PORT: 29010
 
