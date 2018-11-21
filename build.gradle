@@ -34,6 +34,6 @@ dependencies {
 test {
   useJUnitPlatform()
   // These environment variables are needed by RegexPrincipalTests, RegexPrincipalBuilderTests
-  environment "KAFKA_PRINCIPAL_BUILDER_REGEX", "(.+)/(.+)"
+  environment "KAFKA_PRINCIPAL_BUILDER_REGEX", "(.+)/.+"
   environment "MALFORMED_REGEX", "(.+"
 }
