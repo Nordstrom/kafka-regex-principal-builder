@@ -1,5 +1,3 @@
-# TODO
-
 # Contributing
 
 For people contributing to this project.

@@ -53,8 +53,8 @@ public class RegexPrincipal {
         }
       }
     }
-    log.debug("regexprincipal:pattern={}, original={}, regex.group1={}", pattern.pattern(), original,
-        matched);
+    log.debug("regexprincipal:pattern={}, original={}, regex.group1={}", pattern.pattern(),
+      original, matched);
     return matched;
   }
 

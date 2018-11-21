@@ -7,6 +7,8 @@ apply plugin: 'java'
 apply from:   'quality.gradle'
 apply plugin: 'checkstyle'
 
+group = 'com.nordstrom.kafka.security.auth'
+version = '0.0.3'
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
 
