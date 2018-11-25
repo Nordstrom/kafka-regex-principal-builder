@@ -11,7 +11,7 @@ import org.junit.jupiter.api.Test;
 
 class RegexPrincipalTests {
   // NB: KAFKA_PRINCIPAL_BUILDER_REGEX_ENV_VAR and MALFORMED_REGEX are environment variables
-  // that must be set in the test run configuration currently '(.+)/(.+)' and '(.+', respectively.
+  // that must be set in the test run configuration currently '(.+)\\..+' and '(.+', respectively.
 
   RegexPrincipal regex;
 
@@ -26,14 +26,14 @@ class RegexPrincipalTests {
   @Test
   void testWithNoEnvUsesDefaultRegex() {
     regex = new RegexPrincipal("NOT_THE_DROIDS_YOURE_LOOKING_FOR");
-    final String original = "bluest-heron/bob-the-builder/shiva-the-destroyer";
+    final String original = "bluest-heron.bob-the-builder.shiva-the-destroyer";
     final String principal = regex.principal(original);
     assertEquals(original, principal, "Principal does not match");
   }
 
   @Test
-  void testWithSlashPathEnvVar() {
-    final String original = "bluest-heron/bob-the-builder";
+  void testWithDotPropertyEnvVar() {
+    final String original = "bluest-heron.bob-the-builder";
     final String principal = regex.principal(original);
     assertEquals("bluest-heron", principal, "Principal does not match");
   }
