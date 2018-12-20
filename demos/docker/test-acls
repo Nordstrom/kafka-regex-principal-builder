@@ -3,6 +3,8 @@
 
 # Notes: Using tools in garfunkel repository (not in github, sorry).
 #
+# LOCAL KAFKA CLUSTER (docker-compose)
+#=====================================
 # Allow all users to read all topics.
 #groovy allow-consumers.groovy --bootstrap.servers=broker1:9093 --security.protocol=SASL_PLAINTEXT --sasl.username=admin --sasl.password=sgtpepper
 
@@ -30,6 +32,36 @@
 #groovy list-topics.groovy --bootstrap.servers=broker1:9093 --security.protocol=SASL_PLAINTEXT --sasl.username=beatles.john --sasl.password=sgtpepper
 #groovy list-topics.groovy --bootstrap.servers=broker1:9093 --security.protocol=SASL_PLAINTEXT --sasl.username=apple-records --sasl.password=sgtpepper
 
+# PUBLIC DEV KAFKA CLUSTER
+#=====================================
+# Allow all users to read all topics.
+#groovy allow-consumers.groovy --bootstrap.servers=$dpubBS --sasl.username=proton --sasl.password=$KAFKA_NONPROD_PROTON_SECRET_KEY
+
+# Add consumer, producer credentials: consumers apple-records, producers beatles.john, .paul, .george, .ringo
+# Must use conf file shown below:
+# jaas-regex.conf
+# Client {
+#   org.apache.kafka.common.security.plain.PlainLoginModule required
+#   username="kafka"
+#   password="sgtpepper";
+# };
+#groovy -Djava.security.auth.login.config=jaas-dev.conf add-credentials.groovy --zookeeper=172.19.69.23:2181/kafka-dev --secret=sgtpepper --name=apple-records
+#groovy -Djava.security.auth.login.config=jaas-dev.conf add-credentials.groovy --zookeeper=172.19.69.23:2181/kafka-dev --secret=sgtpepper --name=beatles.john
+#groovy -Djava.security.auth.login.config=jaas-dev.conf add-credentials.groovy --zookeeper=172.19.69.23:2181/kafka-dev --secret=sgtpepper --name=beatles.paul
+#groovy -Djava.security.auth.login.config=jaas-dev.conf add-credentials.groovy --zookeeper=172.19.69.23:2181/kafka-dev --secret=sgtpepper --name=beatles.george
+#groovy -Djava.security.auth.login.config=jaas-dev.conf add-credentials.groovy --zookeeper=172.19.69.23:2181/kafka-dev --secret=sgtpepper --name=beatles.ringo
+
+# Add topics
+#groovy add-topic.groovy --bootstrap.servers=$dpubBS --sasl.username=proton --sasl.password=$KAFKA_NONPROD_PROTON_SECRET_KEY --partition.count=1 --replication.factor=2 --topic=strawberry-fields
+# Only have to allow just principal to produce messages
+#groovy allow-producer.groovy --bootstrap.servers=$dpubBS --sasl.username=proton --sasl.password=$KAFKA_NONPROD_PROTON_SECRET_KEY --principal.name=beatles --topic=strawberry-fields
+# List acls
+#groovy list-acls.groovy --bootstrap.servers=$dpubBS --sasl.username=proton --sasl.password=$KAFKA_NONPROD_PROTON_SECRET_KEY
+# Producer and Consumer can list topics
+#groovy list-topics.groovy --bootstrap.servers=$dpubBS --sasl.username=proton --sasl.password=$KAFKA_NONPROD_PROTON_SECRET_KEY
+#groovy list-topics.groovy --bootstrap.servers=$dpubBS --sasl.username=beatles.john --sasl.password=sgtpepper
+#groovy list-topics.groovy --bootstrap.servers=$dpubBS --sasl.username=apple-records --sasl.password=sgtpepper
+
 echo "--[ create topics ]--"
 docker-compose exec broker1 kafka-topics --create \
   --zookeeper zookeeper:2181 \
@@ -47,22 +79,22 @@ docker-compose exec broker1 kafka-configs --alter \
   --zookeeper zookeeper:2181 \
   --add-config 'SCRAM-SHA-256=[password=sgtpepper],SCRAM-SHA-512=[password=sgtpepper]' \
   --entity-type users \
-  --entity-name beatles/john
+  --entity-name beatles.john
 docker-compose exec broker1 kafka-configs --alter \
   --zookeeper zookeeper:2181 \
   --add-config 'SCRAM-SHA-256=[password=sgtpepper],SCRAM-SHA-512=[password=sgtpepper]' \
   --entity-type users \
-  --entity-name beatles/paul
+  --entity-name beatles.paul
 docker-compose exec broker1 kafka-configs --alter \
   --zookeeper zookeeper:2181 \
   --add-config 'SCRAM-SHA-256=[password=sgtpepper],SCRAM-SHA-512=[password=sgtpepper]' \
   --entity-type users \
-  --entity-name beatles/george
+  --entity-name beatles.george
 docker-compose exec broker1 kafka-configs --alter \
   --zookeeper zookeeper:2181 \
   --add-config 'SCRAM-SHA-256=[password=sgtpepper],SCRAM-SHA-512=[password=sgtpepper]' \
   --entity-type users \
-  --entity-name beatles/ringo
+  --entity-name beatles.ringo
 
 echo "--[ allow apple-records to read from topic ]--"
 docker-compose exec broker1 kafka-acls --add \
@@ -152,3 +184,26 @@ docker run -i --rm \
     -X sasl.username=apple-records \
     -X sasl.password=sgtpepper \
     -C -t strawberry-fields -o beginning -e
+
+# #TESTS for public nonprod proton
+# echo "hello, (kafka-stream) world" | kafkacat -b $npubBS \
+#     -X security.protocol=sasl_ssl \
+#     -X sasl.mechanisms=SCRAM-SHA-512 \
+#     -X sasl.username=$KAFKA_AMUSING_CHIPMUNK_USER \
+#     -X sasl.password=$KAFKA_NONPROD_AMUSING_CHIPMUNK_SECRET_KEY \
+#     -P -t hello-stream
+#
+# #TEST for public dev proton
+# echo "[beatles.john] says   'Let me take you down'" | kafkacat -b $dpubBS \
+#     -X security.protocol=sasl_ssl \
+#     -X sasl.mechanisms=SCRAM-SHA-512 \
+#     -X sasl.username=beatles.john \
+#     -X sasl.password=sgtpepper \
+#     -P -t strawberry-fields
+#
+# kafkacat -b $dpubBS \
+#     -X security.protocol=sasl_ssl \
+#     -X sasl.mechanisms=SCRAM-SHA-512 \
+#     -X sasl.username=apple-records \
+#     -X sasl.password=sgtpepper \
+#     -C -t strawberry-fields -o beginning -e
