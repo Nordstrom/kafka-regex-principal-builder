@@ -8,7 +8,12 @@ A KafkaPrincipalBuilder that uses a regular expression to determine the authenti
 
 ## Supported Kafka versions:
 
-The `RegExPrincipalBuilder` has been tested with kafka `v2.0.0` and `v2.0.1`(see build.gradle for dependencies)
+The `RegexPrincipalBuilder` has been checked for compatibility with Kafka 2.0.0 - 2.2.0. See table below for the appropriate version to use:
+
+|Kafka version|Connector version|
+|:-|:-|
+|2.1|1.0|
+|2.2|2.0|
 
 ## JMX Metrics
 RegexPrincipalBuilder emits two JMX metrics:
@@ -21,7 +26,7 @@ kafka.security.RegexPrincipalBuilder
 
 ## Running the demo
 
-The demo runs a single-node zookeeper and kafka broker cluster with SASL_PLAINTEXT authentication.
+The demo runs a single-node zookeeper and Kafka broker cluster with SASL_PLAINTEXT authentication.
 
 In `docker-compose.yml`, the regular expression for resolving the principal name is `KAFKA_PRINCIPAL_BUILDER_REGEX: "(.+)\\..+"` which will resolve to just `my-principal` name for a naming convention of `<my-principal>.<my-user>`.
 
@@ -32,7 +37,7 @@ In `docker-compose.yml`, the regular expression for resolving the principal name
 $ gradle clean assemble
 ```
 
-### Start the kafka cluster.
+### Start the Kafka cluster.
 
 ```shell
 ~/regex-principal-builder$ cd demos/docker
@@ -49,7 +54,7 @@ The consumer acls are set to allow it to read from all topics (ALLOW_CONSUMER). 
 ~/regex-principal-builder/demos/docker$ ./test-acls
 ```
 
-### Tear-down kafka cluster
+### Tear-down Kafka cluster
 
 ```shell
 ~/regex-principal-builder/demos/docker$ docker-compose down

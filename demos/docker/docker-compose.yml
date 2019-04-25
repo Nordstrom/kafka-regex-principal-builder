@@ -21,7 +21,7 @@ services:
     - ./private/jaas.zookeeper.conf:/var/private/jaas.conf
 
   bootstrap:
-    image: confluentinc/cp-kafka:5.1.0
+    image: confluentinc/cp-kafka:5.2.0
     entrypoint: /bootstrap.sh
     environment:
       KAFKA_OPTS: "-Djava.security.auth.login.config=/var/private/jaas.conf"
@@ -33,7 +33,7 @@ services:
     depends_on: [zookeeper]
 
   broker1:
-    image: confluentinc/cp-kafka:5.1.0
+    image: confluentinc/cp-kafka:5.2.0
     networks:
       - kafka_local
     ports:
@@ -77,7 +77,7 @@ services:
 
       KAFKA_CONFLUENT_SUPPORT_METRICS_ENABLE: "false"
 
-      # Include principal-builder jar file to class path.
+      # Include principal-builder jar file in classpath.
       CLASSPATH: "/var/lib/extras/*"
       KAFKA_PRINCIPAL_BUILDER_CLASS: "com.nordstrom.kafka.security.auth.RegexPrincipalBuilder"
       # Regex to derive principal following 'principal.uid' naming convention
@@ -137,7 +137,7 @@ services:
   #
   #     KAFKA_CONFLUENT_SUPPORT_METRICS_ENABLE: "false"
   #
-  #     # Include principal-builder jar file to class path.
+  #     # Include principal-builder jar file in classpath.
   #     CLASSPATH: "/var/lib/extras/*"
   #     KAFKA_PRINCIPAL_BUILDER_CLASS: "com.nordstrom.kafka.security.auth.RegexPrincipalBuilder"
   #     # Regex to derive principal following 'slash-path' naming convention of <principal>/<user>
