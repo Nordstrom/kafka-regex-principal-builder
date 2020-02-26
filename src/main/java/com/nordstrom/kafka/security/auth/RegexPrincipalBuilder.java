@@ -11,7 +11,6 @@ import org.apache.kafka.common.security.auth.KafkaPrincipal;
 import org.apache.kafka.common.security.auth.KafkaPrincipalBuilder;
 import org.apache.kafka.common.security.authenticator.DefaultKafkaPrincipalBuilder;
 import org.apache.kafka.common.utils.LogContext;
-import org.apache.kafka.common.utils.Utils;
 import org.slf4j.Logger;
 
 
@@ -53,7 +52,8 @@ public class RegexPrincipalBuilder implements KafkaPrincipalBuilder {
   public KafkaPrincipal build(AuthenticationContext authenticationContext) {
     requests.mark();
     try {
-      Utils.notNull(authenticationContext);
+      if (authenticationContext == null)
+        throw new NullPointerException();
 
       final KafkaPrincipal defaultPrincipal = kafkaPrincipalBuilder.build(authenticationContext);
       final String original = defaultPrincipal.getName();
