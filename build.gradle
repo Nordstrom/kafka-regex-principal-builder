@@ -8,7 +8,7 @@ apply from:   'quality.gradle'
 apply plugin: 'checkstyle'
 
 group = 'com.nordstrom.kafka.security.auth'
-version = '2.0.0'
+version = '2.1.0'
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
 
@@ -24,7 +24,7 @@ checkstyle {
 }
 
 dependencies {
-  implementation( 'org.apache.kafka:kafka_2.12:2.2.0' )
+  implementation( 'org.apache.kafka:kafka_2.12:2.4.0' )
   implementation( 'com.yammer.metrics:metrics-core:2.2.0' )
 
   testImplementation  'org.junit.jupiter:junit-jupiter-api:5.1.0'
