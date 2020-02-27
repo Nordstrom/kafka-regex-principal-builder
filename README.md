@@ -8,12 +8,13 @@ A KafkaPrincipalBuilder that uses a regular expression to determine the authenti
 
 ## Supported Kafka versions:
 
-The `RegexPrincipalBuilder` has been checked for compatibility with Kafka 2.0.0 - 2.2.0. See table below for the appropriate version to use:
+The `RegexPrincipalBuilder` has been checked for compatibility with Kafka 2.0 - 2.4. See table below for the appropriate version to use:
 
-|Kafka version|Connector version|
-|:-|:-|
-|2.1|1.0|
-|2.2|2.0|
+|Kafka version|This version|
+|-:|-:|
+|2.1|1.0.0|
+|2.2, 2.3|2.0.0|
+|2.4|2.1.0|
 
 ## JMX Metrics
 RegexPrincipalBuilder emits two JMX metrics:
