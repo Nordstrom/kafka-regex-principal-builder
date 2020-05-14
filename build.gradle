@@ -8,7 +8,7 @@ apply from:   'quality.gradle'
 apply plugin: 'checkstyle'
 
 group = 'com.nordstrom.kafka.security.auth'
-version = '2.1.0'
+version = '2.1.1'
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
 
