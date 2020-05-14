@@ -31,9 +31,9 @@ public class RegexPrincipalBuilder implements KafkaPrincipalBuilder {
   // 'type', 'name', and 'scope'.
   // See
   // http://javadox.com/com.yammer.metrics/metrics-core/2.2.0/com/yammer/metrics/core/MetricName.html#MetricName(java.lang.String,%20java.lang.String,%20java.lang.String,%20java.lang.String,%20java.lang.String)
-  private final MetricName requestsName = new MetricName("", "", "", "",
+  private final MetricName requestsName = new MetricName("kafka", "RegexPrincipalBuilder", "RequestsPerSec", "kafka.security",
       "kafka.security:type=RegexPrincipalBuilder,name=RequestsPerSec");
-  private final MetricName errorsName = new MetricName("", "", "", "",
+  private final MetricName errorsName = new MetricName("kafka", "RegexPrincipalBuilder", "ErrorsPerSec", "kafka.security",
       "kafka.security:type=RegexPrincipalBuilder,name=ErrorsPerSec");
   private final Meter requests =
       Metrics.newMeter(requestsName, "regex-principal-builder", TimeUnit.SECONDS);
